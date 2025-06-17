@@ -35,16 +35,6 @@ html
 Copy
 Edit
 <link rel="icon" type="image/png" href="logo.png">
-🌐 How to Publish
-You can publish your site using:
-
-GitHub Pages
-
-Netlify (drag & drop index.html)
-
-Vercel
-
-Any static web host
 
 📁 File Structure
 cpp
