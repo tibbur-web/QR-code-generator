@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      padding: 2rem;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      color: #222;
+      margin-bottom: 2rem;
+    }
+    textarea, input[type="text"] {
+      width: 80%;
+      padding: 1rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input[type="file"] {
+      margin-top: 1rem;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #qrcode {
+      margin-top: 2rem;
+    }
+    .type-button {
+      padding: 0.75rem 1rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+    }
+    .paragraph-btn { background-color: #ff6f61; }
+    .link-btn { background-color: #6f42c1; }
+    .image-btn { background-color: #20c997; }
+    .video-btn { background-color: #fd7e14; }
+  </style>
+</head>
+<body>
+  <h1>QR Code Generator</h1>
+
+  <div>
+    <button class="type-button paragraph-btn" onclick="setInputType('paragraph')">Paragraph</button>
+    <button class="type-button link-btn" onclick="setInputType('link')">Link</button>
+    <button class="type-button image-btn" onclick="setInputType('image')">Image URL</button>
+    <button class="type-button video-btn" onclick="setInputType('video')">Video URL</button>
+  </div>
+
+  <textarea id="paragraphInput" placeholder="Enter your paragraph here..."></textarea>
+  <input type="text" id="linkInput" placeholder="Enter link here..." style="display:none;">
+
+  <div id="imageSection" style="display:none;">
+    <input type="text" id="imageInput" placeholder="Paste image URL here...">
+    <br><input type="file" accept="image/*" id="imageFileInput" onchange="handleFileInput('image')">
+    <br><button onclick="openCamera('image')">Use Camera</button>
+  </div>
+
+  <div id="videoSection" style="display:none;">
+    <input type="text" id="videoInput" placeholder="Paste video URL here...">
+    <br><input type="file" accept="video/*" id="videoFileInput" onchange="handleFileInput('video')">
+    <br><button onclick="openCamera('video')">Use Camera</button>
+  </div>
+
+  <br><button onclick="generateQRCode()">Generate QR Code</button>
+
+  <div id="qrcode"></div>
+
+  <script>
+    function setInputType(type) {
+      document.getElementById("paragraphInput").style.display = type === "paragraph" ? "block" : "none";
+      document.getElementById("linkInput").style.display = type === "link" ? "block" : "none";
+      document.getElementById("imageSection").style.display = type === "image" ? "block" : "none";
+      document.getElementById("videoSection").style.display = type === "video" ? "block" : "none";
+      document.getElementById("inputType").value = type;
+    }
+
+    function handleFileInput(type) {
+      const fileInput = document.getElementById(type + "FileInput");
+      const file = fileInput.files[0];
+      if (file) {
+        if (file.size > 20 * 1024 * 1024) { // 20 MB limit
+          alert("File size exceeds 20MB. Please select a smaller file.");
+          fileInput.value = "";
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        document.getElementById(type + "Input").value = url;
+      }
+    }
+
+    function openCamera(type) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          video.play();
+          alert("Camera stream is active, but this demo does not capture frames. Please upload captured media manually.");
+        })
+        .catch(err => alert("Camera access denied: " + err));
+    }
+
+    function generateQRCode() {
+      const type = document.getElementById("inputType").value;
+      const qrcodeContainer = document.getElementById("qrcode");
+      let content = "";
+
+      if (type === "paragraph") content = document.getElementById("paragraphInput").value;
+      if (type === "link") content = document.getElementById("linkInput").value;
+      if (type === "image") content = document.getElementById("imageInput").value;
+      if (type === "video") content = document.getElementById("videoInput").value;
+
+      qrcodeContainer.innerHTML = "";
+      if (content.trim() !== "") {
+        QRCode.toCanvas(content, { width: 250 }, function (err, canvas) {
+          if (err) console.error(err);
+          else qrcodeContainer.appendChild(canvas);
+        });
+      } else {
+        qrcodeContainer.innerHTML = "<p>Please enter valid content.</p>";
+      }
+    }
+  </script>
+
+  <select id="inputType" style="display:none">
+    <option value="paragraph">Paragraph</option>
+    <option value="link">Link</option>
+    <option value="image">Image URL</option>
+    <option value="video">Video URL</option>
+  </select>
+</body>
+</html>
